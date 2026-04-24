@@ -1,33 +1,56 @@
-from flask import Flask
+from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
-# Home route
-@app.route('/')
-def home():
-    return "Simple Calculator App! Try /add/2/3"
+# HTML UI inside Python (simple way)
+html_page = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculator</title>
+</head>
+<body>
+    <h2>Simple Calculator</h2>
+    
+    <form method="post">
+        <input type="number" name="num1" placeholder="Enter first number" required>
+        <input type="number" name="num2" placeholder="Enter second number" required>
+        
+        <br><br>
+        
+        <button name="operation" value="add">Add</button>
+        <button name="operation" value="sub">Subtract</button>
+        <button name="operation" value="mul">Multiply</button>
+        <button name="operation" value="div">Divide</button>
+    </form>
+    
+    <h3>{{ result }}</h3>
+</body>
+</html>
+"""
 
-# Addition
-@app.route('/add/<int:a>/<int:b>')
-def add(a, b):
-    return f"Result: {a + b}"
+@app.route('/', methods=['GET', 'POST'])
+def calculator():
+    result = ""
 
-# Subtraction
-@app.route('/sub/<int:a>/<int:b>')
-def sub(a, b):
-    return f"Result: {a - b}"
+    if request.method == 'POST':
+        a = float(request.form['num1'])
+        b = float(request.form['num2'])
+        op = request.form['operation']
 
-# Multiplication
-@app.route('/mul/<int:a>/<int:b>')
-def mul(a, b):
-    return f"Result: {a * b}"
+        if op == 'add':
+            result = a + b
+        elif op == 'sub':
+            result = a - b
+        elif op == 'mul':
+            result = a * b
+        elif op == 'div':
+            if b == 0:
+                result = "Error: Division by zero"
+            else:
+                result = a / b
 
-# Division
-@app.route('/div/<int:a>/<int:b>')
-def div(a, b):
-    if b == 0:
-        return "Error: Division by zero"
-    return f"Result: {a / b}"
+    return render_template_string(html_page, result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)
